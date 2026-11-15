@@ -1,4 +1,3 @@
-
 import os
 import time
 import shutil
@@ -63,7 +62,6 @@ ALLOWED_HOSTS = [
     "threads.net",
 ]
 
-# Simple in-memory rate limiter
 RATE_LIMIT = 10
 RATE_WINDOW = 3600
 request_history = {}
@@ -189,18 +187,14 @@ def download_video(
 
     url = data.url.strip()
 
-    # Validate URL
     validate_url(url)
 
-    # Rate limit
     client_ip = request.client.host if request.client else "unknown"
     check_rate_limit(client_ip)
 
-    # Check Deno
     if not os.path.isfile(DENO_PATH):
         logger.error("Deno not found: %s", DENO_PATH)
 
-    # Temporary folder
     temp_dir = tempfile.mkdtemp(prefix="social_download_")
 
     output_template = os.path.join(
@@ -208,14 +202,13 @@ def download_video(
         "%(id)s.%(ext)s"
     )
 
-    # yt-dlp command
     command = [
         "yt-dlp",
 
         "--js-runtimes",
         f"deno:{DENO_PATH}",
 
-        "--no-warnings",
+        "--verbose",
         "--no-playlist",
         "--no-part",
 
@@ -248,7 +241,6 @@ def download_video(
             timeout=DOWNLOAD_TIMEOUT
         )
 
-        # Find downloaded file
         files = [
             f for f in Path(temp_dir).iterdir()
             if f.is_file()
@@ -270,7 +262,6 @@ def download_video(
                 detail=error_message[-2000:]
             )
 
-        # Select largest output file
         downloaded_file = max(
             files,
             key=lambda f: f.stat().st_size
@@ -278,7 +269,6 @@ def download_video(
 
         file_size = downloaded_file.stat().st_size
 
-        # Check actual file size
         if file_size > MAX_FILE_BYTES:
 
             cleanup_directory(temp_dir)
@@ -297,7 +287,6 @@ def download_video(
                 detail="Downloaded file is empty."
             )
 
-        # Return downloaded video
         background_tasks.add_task(
             cleanup_directory,
             temp_dir
