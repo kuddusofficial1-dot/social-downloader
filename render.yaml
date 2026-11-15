@@ -12,3 +12,11 @@ services:
       pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
+
+    buildCommand: |
+      apt-get update && apt-get install -y curl unzip
+      curl -fsSL https://deno.land/install.sh | sh
+      export DENO_INSTALL="$HOME/.deno"
+      export PATH="$DENO_INSTALL/bin:$PATH"
+      "$HOME/.deno/bin/deno" --version
+      pip install -r requirements.txt
