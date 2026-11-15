@@ -4,15 +4,15 @@ services:
     runtime: python
     plan: free
 
-    buildCommand: |
-      export DENO_INSTALL=/opt/render/.deno
-      curl -fsSL https://deno.land/install.sh | sh
-      /opt/render/.deno/bin/deno --version
-      pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
 
     startCommand: |
       export DENO_INSTALL=/opt/render/.deno
-      export PATH="/opt/render/.deno/bin:$PATH"
-      uvicorn main:app --host 0.0.0.0 --port $PORT
+      if [ ! -x "$DENO_INSTALL/bin/deno" ]; then
+        curl -fsSL https://deno.land/install.sh | sh
+      fi
+      export PATH="$DENO_INSTALL/bin:$PATH"
+      deno --version
+      exec uvicorn main:app --host 0.0.0.0 --port $PORT
 
     healthCheckPath: /health
