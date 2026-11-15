@@ -1,3 +1,5 @@
-fastapi==0.115.12
-uvicorn[standard]==0.34.2
-yt-dlp==2025.3.31
+
+fastapi
+uvicorn[standard]
+--pre
+yt-dlp[default]
